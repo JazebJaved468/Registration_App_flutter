@@ -36,7 +36,7 @@ class _LoginState extends State<Login> {
       isLoader = false;
 
       // navifating to home
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Home()),
       );
@@ -61,7 +61,7 @@ class _LoginState extends State<Login> {
           actions: [
             TextButton(
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const Register()),
                   );
@@ -76,11 +76,17 @@ class _LoginState extends State<Login> {
                 //email
                 TextField(
                   controller: emailController,
+                  decoration: InputDecoration(
+                    hintText: "Email",
+                  ),
                 ),
 
                 //password
                 TextField(
                   controller: passwordController,
+                  decoration: InputDecoration(
+                    hintText: "Password",
+                  ),
                 ),
 
                 ElevatedButton(

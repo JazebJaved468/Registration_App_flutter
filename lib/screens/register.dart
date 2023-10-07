@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:registration_app/screens/login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -13,13 +14,14 @@ class _RegisterState extends State<Register> {
   // controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final contactController = TextEditingController();
+  final addressController = TextEditingController();
 
   // checks
   bool isLoader = false;
   bool isregistered = false;
   bool isSignupPressed = false;
   String message = "";
-
 
   // signup method
   Future createUser() async {
@@ -29,6 +31,8 @@ class _RegisterState extends State<Register> {
     print("after set state");
     String emailAddress = emailController.text.trim();
     String password = passwordController.text.trim();
+    String contact = contactController.text.trim();
+    String address = addressController.text.trim();
 
     print("object");
 
@@ -39,9 +43,26 @@ class _RegisterState extends State<Register> {
         password: password,
       );
 
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentReference users =
+            FirebaseFirestore.instance.collection('users').doc(user.email);
+        users.set({
+          'email': emailAddress,
+          'password': password,
+          'uid': user.uid,
+          'contact': contact,
+          'address': address,
+        });
+      }
+
       isLoader = false;
       // isregistered = true;
       message = "User registered succesfully";
+      emailController.clear();
+      passwordController.clear();
+      contactController.clear();
+      addressController.clear();
       setState(() {});
       print(credential);
     } on FirebaseAuthException catch (e) {
@@ -83,7 +104,7 @@ class _RegisterState extends State<Register> {
           actions: [
             TextButton(
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const Login()),
                   );
@@ -98,13 +119,33 @@ class _RegisterState extends State<Register> {
                 //email
                 TextField(
                   controller: emailController,
+                  decoration: InputDecoration(
+                    hintText: "Email",
+                  ),
                 ),
 
                 //password
                 TextField(
                   controller: passwordController,
+                  decoration: InputDecoration(
+                    hintText: "Password",
+                  ),
                 ),
 
+                //contact
+                TextField(
+                  controller: contactController,
+                  decoration: InputDecoration(
+                    hintText: "Contact No.",
+                  ),
+                ),
+                //address
+                TextField(
+                  controller: addressController,
+                  decoration: InputDecoration(
+                    hintText: "Address",
+                  ),
+                ),
                 ElevatedButton(
                   onPressed: () {
                     // print(emailController.text);
