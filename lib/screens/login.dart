@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:registration_app/screens/home.dart';
 import 'package:registration_app/screens/register.dart';
+import 'package:registration_app/services/googleAuth.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,6 +16,9 @@ class _LoginState extends State<Login> {
   // controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // Google sign in object
+  final GoogleAuth googleAuth = GoogleAuth();
 
   // checks
   bool isLoader = false;
@@ -35,7 +40,7 @@ class _LoginState extends State<Login> {
       );
       isLoader = false;
 
-      // navifating to home
+      // navigating to home
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Home()),
@@ -49,6 +54,47 @@ class _LoginState extends State<Login> {
 
         print('Wrong password provided for that user.');
       }
+    }
+  }
+
+  // signup method
+  Future createGoogleUser() async {
+    // isSignupPressed = true;
+    isLoader = true;
+    setState(() {});
+    // print("after set state");
+
+    // print("object");
+
+    try {
+      await googleAuth.googleSignIn();
+      print(FirebaseAuth.instance.currentUser);
+      // navigating to home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+      ;
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentReference users =
+            FirebaseFirestore.instance.collection('users').doc(user.email);
+        users.set({
+          'email': user.email,
+          'password': "",
+          'uid': user.uid,
+          'contact': "",
+          'address': "",
+        });
+      }
+
+      isLoader = false;
+      setState(() {});
+    } catch (e) {
+      isLoader = false;
+      message = "$e";
+      setState(() {});
     }
   }
 
@@ -118,7 +164,9 @@ class _LoginState extends State<Login> {
                         ),
                         child: Center(
                           child: IconButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                createGoogleUser();
+                              },
                               icon: Icon(
                                 Icons.g_mobiledata,
                                 size: 70,
